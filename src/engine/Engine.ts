@@ -4,17 +4,21 @@ export default class Engine {
 
     constructor() {
         try {
+            // Revert to standard stockfish.js for maximum compatibility
+            // Reduced resource usage to prevent freezing on mobile/lower-end devices
             this.worker = new Worker("/stockfish.js");
+            this.worker.onerror = (e) => { console.error("Worker error:", e); };
+
             this.worker.onmessage = (event) => {
                 if (this.onMessageCallback) {
                     this.onMessageCallback(event.data);
                 }
             };
             this.worker.postMessage("uci");
-            // "Yenilmez Mod" Ayarları
-            this.worker.postMessage("setoption name Hash value 256"); // Hafızayı artır (MB)
+            // "Yenilmez Mod" Ayarları - Optimize Edildi
+            this.worker.postMessage("setoption name Hash value 32"); // 32MB (Donmayı önlemek için düşürüldü)
             try {
-                this.worker.postMessage("setoption name Threads value 4"); // 4 Çekirdek (Cihaz destekliyorsa)
+                this.worker.postMessage("setoption name Threads value 1"); // Tek çekirdek (Daha güvenli)
             } catch (e) {/*ignore*/ }
             this.worker.postMessage("setoption name Skill Level value 20"); // Maksimum Yetenek
             this.worker.postMessage("setoption name MultiPV value 1"); // Sadece en iyi hamleye odaklan
